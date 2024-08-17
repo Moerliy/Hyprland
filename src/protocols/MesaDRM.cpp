@@ -99,9 +99,15 @@ CMesaDRMResource::CMesaDRMResource(SP<CWlDrm> resource_) : resource(resource_) {
     resource->sendDevice(PROTO::mesaDRM->nodeName.c_str());
     resource->sendCapabilities(WL_DRM_CAPABILITY_PRIME);
 
-    auto fmts = g_pHyprOpenGL->getDRMFormats();
-    for (auto& fmt : fmts) {
-        resource->sendFormat(fmt.drmFormat);
+    for (auto& impl : g_pCompositor->m_pAqBackend->getImplementations()) {
+        if (impl->type() != Aquamarine::eBackendType::AQ_BACKEND_DRM)
+            continue;
+
+        for (auto& fmt : impl->getRenderFormats()) {
+            resource->sendFormat(fmt.drmFormat);
+        }
+
+        break;
     }
 }
 
